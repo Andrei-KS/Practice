@@ -48,7 +48,7 @@ protected:
 	virtual void BeginPlay();
 
 public:
-		
+
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
@@ -64,6 +64,26 @@ public:
 	/** Getter for the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 	bool GetHasRifle();
+
+  /** Ammo counter **/
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+  int AmmoAmount;
+
+  /** Max ammo amount **/
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
+  int MaxAmmoAmount = 100;
+
+  /** Getter for the uint32 **/
+  UFUNCTION(BlueprintCallable, Category = Weapon)
+  int GetAmmoAmount();
+
+  /** Add ammo to character inventory **/
+  UFUNCTION(BlueprintCallable, Category = Weapon)
+  void AddAmmo(int AdditionAmmoAmount);
+
+  /** try to consume ammo from character inventory **/
+  UFUNCTION(BlueprintCallable, Category = Weapon)
+  bool TryToConsumeAmmo(int RequestedAmmoAmount);
 
 protected:
 	/** Called for movement input */

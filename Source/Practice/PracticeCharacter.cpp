@@ -21,6 +21,9 @@ APracticeCharacter::APracticeCharacter()
 	// Character doesnt have a rifle at start
 	bHasRifle = false;
 	
+  // Character doesnt have a ammo at start
+  AmmoAmount = 0;
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 		
@@ -115,4 +118,33 @@ void APracticeCharacter::SetHasRifle(bool bNewHasRifle)
 bool APracticeCharacter::GetHasRifle()
 {
 	return bHasRifle;
+}
+
+int APracticeCharacter::GetAmmoAmount()
+{
+  return AmmoAmount;
+}
+
+void APracticeCharacter::AddAmmo(int AdditionAmmoAmount)
+{
+  AmmoAmount += AdditionAmmoAmount;
+  if (AmmoAmount > MaxAmmoAmount)
+  {
+    AmmoAmount = MaxAmmoAmount;
+  }
+  GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("APracticeCharacter::AddAmmo. AdditionAmmoAmount %d, in inventary %d"), AdditionAmmoAmount, AmmoAmount));
+}
+
+bool APracticeCharacter::TryToConsumeAmmo(int RequestedAmmoAmount)
+{
+  // If the character has enough ammo, the requested ammo amount will be consumed
+  if (RequestedAmmoAmount <= AmmoAmount)
+  {
+    GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("APracticeCharacter::TryToConsumeAmmo consume %d ammo, remmanig %d ammo"), RequestedAmmoAmount, AmmoAmount));
+    AmmoAmount -= RequestedAmmoAmount;
+    return true;
+  }
+
+  GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("APracticeCharacter::TryToConsumeAmmo can't consume %d ammo, remmanig %d ammo"), RequestedAmmoAmount, AmmoAmount));
+  return false;
 }
