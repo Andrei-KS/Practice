@@ -17,7 +17,15 @@ void UHealth::BeginPlay()
 
 void UHealth::ReduceHealthBy(int DamageValue)
 {
+  
+  if (bIsImmortal)
+  {
+    GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("Object get hit, but this object is immortal")));
+    return;
+  }
+
   Health -= DamageValue;
+  GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("Object get hit, DamageValue %d, remaing %d health"), DamageValue, Health));
 
   if (Health <= 0)
   {

@@ -20,7 +20,10 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health", meta = (ClampMin = "0", UIMin = "0"))
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+  bool bIsImmortal = false;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health", meta = (ClampMin = "0", UIMin = "0", EditCondition = "bIsImmortal == false"))
   int Health = 100;
 
 public:
