@@ -1,23 +1,23 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Health.h"
+#include "HealthComponent.h"
 
 // Sets default values for this component's properties
-UHealth::UHealth()
+UHealthComponent::UHealthComponent()
 {
 }
 
 
 // Called when the game starts
-void UHealth::BeginPlay()
+void UHealthComponent::BeginPlay()
 {
-	Super::BeginPlay();
+  Super::BeginPlay();
 }
 
-void UHealth::ReduceHealthBy(int DamageValue)
+void UHealthComponent::ApplyDamage(int DamageValue)
 {
-  
+
   if (bIsImmortal)
   {
     GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("Object get hit, but this object is immortal")));

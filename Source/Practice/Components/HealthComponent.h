@@ -4,21 +4,29 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Health.generated.h"
+#include "HealthComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHealthOnDiedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHealthOnHitSignature, int, DamageValue);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PRACTICE_API UHealth : public UActorComponent
+class PRACTICE_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UHealth();
+	UHealthComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+  // Called when the game starts
+  virtual void BeginPlay() override;
+
+  UPROPERTY(BlueprintAssignable, Category = "Health")
+  FHealthOnDiedSignature OnDied;
+
+  UPROPERTY(BlueprintAssignable, Category = "Health")
+  FHealthOnHitSignature OnHit;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
   bool bIsImmortal = false;
@@ -28,5 +36,5 @@ protected:
 
 public:
   UFUNCTION(BlueprintCallable, Category = "Health")
-  void ReduceHealthBy(int DamageValue);
+  void ApplyDamage(int DamageValue);
 };

@@ -4,7 +4,6 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/HealthComponent.h"
-#include "Components/DamageComponent.h"
 
 APracticeProjectile::APracticeProjectile() 
 {
@@ -29,9 +28,6 @@ APracticeProjectile::APracticeProjectile()
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = true;
 
-  // Use DamageComponent to applay damage to other actor that contain health component
-  DamageComponent = CreateDefaultSubobject<UDamageComponent>(TEXT("DamageComp"));
-
 	// Die after 3 seconds by default
 	InitialLifeSpan = 3.0f;
 }
@@ -42,8 +38,6 @@ void APracticeProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
 	{
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-
-    DamageComponent->ApplyDamageTo(OtherActor);
 
     Destroy();
 	}

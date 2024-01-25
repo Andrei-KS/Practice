@@ -8,7 +8,6 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
-class UDamageComponent;
 
 UCLASS(config=Game)
 class APracticeProjectile : public AActor
@@ -22,10 +21,6 @@ class APracticeProjectile : public AActor
 	/** Projectile movement component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
-
-  /** Damage component */
-  UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-  UDamageComponent* DamageComponent;
 
 public:
 	APracticeProjectile();
