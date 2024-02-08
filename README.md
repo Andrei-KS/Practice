@@ -24,3 +24,14 @@ The health component allows adding the possibility of to actor being destroyed i
 ![gun, ammo, and destructible cube](https://github.com/Andrei-KS/Practice/assets/74614116/96cf49cd-636f-4ca3-aaf9-8f45041d5a78)
 
 Added ammo counter to the character actor that doesn't allow shot using a gun if this counter is equal to zero. Also ammo component destroys his actor owner when the character picks up it.
+
+<h1> UI </h1>
+Added a simple HUD that contains an ammo counter.
+
+![ammo counter](https://github.com/Andrei-KS/Practice/assets/74614116/cad7978f-da32-4519-90e0-42bb004df606)
+
+Added a simple pause menu.
+
+![pause menu](https://github.com/Andrei-KS/Practice/assets/74614116/75ee7f27-de5e-453c-b49f-61d54dba16b3)
+
+Blueprints were used only for design, the whole logic is contained in cpp part 
