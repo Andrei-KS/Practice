@@ -9,5 +9,8 @@ public class Practice : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		
+    // UMG Depencies
+    PublicDependencyModuleNames.AddRange(new string[] { "UMG", "Slate", "SlateCore"});
 	}
 }

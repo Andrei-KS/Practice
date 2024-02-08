@@ -41,11 +41,19 @@ class APracticeCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 	
+  /** Move Input Action */
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+  UInputAction* PauseAction;
+
 public:
 	APracticeCharacter();
 
 protected:
+  /** Setup character when game starts. */
 	virtual void BeginPlay();
+
+  /** Cleanup character when game ends. */
+  virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 
@@ -77,6 +85,10 @@ public:
   UFUNCTION(BlueprintCallable, Category = Weapon)
   int GetAmmoAmount();
 
+  /** Getter for the uint32 **/
+  UFUNCTION(BlueprintCallable, Category = Weapon)
+  int GetMaxAmmoAmount();
+
   /** Add ammo to character inventory **/
   UFUNCTION(BlueprintCallable, Category = Weapon)
   void AddAmmo(int AdditionAmmoAmount);
@@ -92,6 +104,9 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+  /** Called for pause input */
+  void Pause(const FInputActionValue& Value);
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
@@ -103,5 +118,25 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+protected:
+  /*
+  * HUD
+  */
+
+  /** Widget class to spawn for the heads up display */
+  UPROPERTY(EditAnywhere, Category = "Player HUD")
+  TSubclassOf<class UPlayerHUD> PlayerHUDClass;
+
+  /** The widget instance that we are use as our Hud */
+  UPROPERTY()
+  class UPlayerHUD* PlayerHUD;
+
+  /** Widget class to spawn for the heads up display */
+  UPROPERTY(EditAnywhere, Category = "Pause menu")
+  TSubclassOf<class UPauseMenu> PauseMenuClass;
+
+  /** The widget instance that we are use as our Hud */
+  UPROPERTY()
+  class UPauseMenu* PauseMenu;
 };
 

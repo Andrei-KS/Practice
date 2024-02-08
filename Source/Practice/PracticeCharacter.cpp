@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "PracticeCharacter.h"
+#include "PracticePlayerController.h"
 #include "PracticeProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
@@ -10,6 +11,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
+#include "UI/PlayerHUD.h"
+#include "UI/PauseMenu.h"
+#include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -42,6 +47,9 @@ APracticeCharacter::APracticeCharacter()
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+  // HUD
+  PlayerHUDClass = nullptr;
+  PlayerHUD = nullptr;
 }
 
 void APracticeCharacter::BeginPlay()
@@ -58,6 +66,30 @@ void APracticeCharacter::BeginPlay()
 		}
 	}
 
+  // HUD
+  if (IsLocallyControlled() && PlayerHUDClass)
+  {
+    // for local player controller
+    APracticePlayerController* PPC = GetController<APracticePlayerController>();
+    check(PPC);
+    PlayerHUD = CreateWidget<UPlayerHUD>(PPC, PlayerHUDClass);
+    check(PlayerHUD);
+    PlayerHUD->AddToPlayerScreen();
+    PlayerHUD->SetAmmo(AmmoAmount, MaxAmmoAmount);
+  }
+}
+
+void APracticeCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+  if (IsValid(PlayerHUD))
+  {
+    PlayerHUD->RemoveFromParent();
+    // We can't destroy the widget directly, let the GC take care of it
+    PlayerHUD = nullptr;
+  }
+
+  // Call the base class  
+  Super::EndPlay(EndPlayReason);
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -76,6 +108,10 @@ void APracticeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APracticeCharacter::Look);
+
+    // Pause
+    EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &APracticeCharacter::Pause);
+
 	}
 	else
 	{
@@ -110,6 +146,23 @@ void APracticeCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void APracticeCharacter::Pause(const FInputActionValue& Value)
+{
+  if (!UGameplayStatics::IsGamePaused(GetWorld()))
+  {
+    // for local player controller
+    APracticePlayerController* PPC = GetController<APracticePlayerController>();
+    check(PPC);
+    PauseMenu = CreateWidget<UPauseMenu>(PPC, PauseMenuClass);
+    check(PauseMenu);
+    PauseMenu->AddToPlayerScreen();
+    UGameplayStatics::SetGamePaused(GetWorld(), true);
+    FInputModeGameAndUI InputModeGameAndUI;
+    PPC->SetInputMode(InputModeGameAndUI);
+    PPC->SetShowMouseCursor(true);
+  }
+}
+
 void APracticeCharacter::SetHasRifle(bool bNewHasRifle)
 {
 	bHasRifle = bNewHasRifle;
@@ -125,6 +178,11 @@ int APracticeCharacter::GetAmmoAmount()
   return AmmoAmount;
 }
 
+int APracticeCharacter::GetMaxAmmoAmount()
+{
+  return MaxAmmoAmount;
+}
+
 void APracticeCharacter::AddAmmo(int AdditionAmmoAmount)
 {
   AmmoAmount += AdditionAmmoAmount;
@@ -132,6 +190,12 @@ void APracticeCharacter::AddAmmo(int AdditionAmmoAmount)
   {
     AmmoAmount = MaxAmmoAmount;
   }
+
+  if (IsValid(PlayerHUD))
+  {
+    PlayerHUD->SetAmmo(AmmoAmount, MaxAmmoAmount);
+  }
+
   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("APracticeCharacter::AddAmmo. AdditionAmmoAmount %d, in inventary %d"), AdditionAmmoAmount, AmmoAmount));
 }
 
@@ -142,6 +206,10 @@ bool APracticeCharacter::TryToConsumeAmmo(int RequestedAmmoAmount)
   {
     GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("APracticeCharacter::TryToConsumeAmmo consume %d ammo, remmanig %d ammo"), RequestedAmmoAmount, AmmoAmount));
     AmmoAmount -= RequestedAmmoAmount;
+    if (IsValid(PlayerHUD))
+    {
+      PlayerHUD->SetAmmo(AmmoAmount, MaxAmmoAmount);
+    }
     return true;
   }
 
