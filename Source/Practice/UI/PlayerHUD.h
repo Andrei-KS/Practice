@@ -16,9 +16,32 @@ class PRACTICE_API UPlayerHUD : public UUserWidget
 	
 public:
   /** Update HUD with current ammo. */
-  void SetAmmo(int CurrentAmmo, int MaxAmmo);
+  void SetAmmo(int CurrentAmmoValue, int MaxAmmoValue);
 
   /** Widgit to use to display current ammo. */
   UPROPERTY(EditAnywhere, meta = (BindWidget))
   class UTextBlock* AmmoCounter;
+
+protected:
+
+  virtual void NativeConstruct() override;
+
+  UPROPERTY(EditAnywhere, Transient, meta=(BindWidgetAnim))
+  class UWidgetAnimation* Increase;
+
+  UPROPERTY(EditAnywhere, Transient, meta=(BindWidgetAnim))
+  class UWidgetAnimation* Decrease;
+
+  FWidgetAnimationDynamicEvent StartDelegate;
+  FWidgetAnimationDynamicEvent EndDelegate;
+
+private:
+  UFUNCTION()
+  void AnimationStarted();
+
+  UFUNCTION()
+  void AnimationFinished();
+
+  int CurrentAmmo;
+  int MaxAmmo;
 };
