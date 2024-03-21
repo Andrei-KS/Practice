@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "PlayerHUD.generated.h"
 
+enum class EWeaponType : uint8;
+
 /**
  * 
  */
@@ -16,7 +18,11 @@ class PRACTICE_API UPlayerHUD : public UUserWidget
 	
 public:
   /** Update HUD with current ammo. */
-  void SetAmmo(int CurrentAmmoValue, int MaxAmmoValue);
+  void SetAmmo(EWeaponType Type, int CurrentAmmoValue, int MaxAmmoValue);
+
+  /** Widgit to use to display current ammo. */
+  UPROPERTY(EditAnywhere, meta = (BindWidget))
+  class UTextBlock* WeaponType;
 
   /** Widgit to use to display current ammo. */
   UPROPERTY(EditAnywhere, meta = (BindWidget))

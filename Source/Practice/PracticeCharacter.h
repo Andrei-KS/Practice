@@ -13,8 +13,17 @@ class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
+class UTP_WeaponComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
+
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+  None = 0,
+  Rifle,
+  Grenade,
+};
 
 UCLASS(config=Game)
 class APracticeCharacter : public ACharacter
@@ -45,6 +54,14 @@ class APracticeCharacter : public ACharacter
   UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
   UInputAction* PauseAction;
 
+  /** TakeRiflInHand Input Action */
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+  UInputAction* TakeRiflInHandAction;
+
+  /** Move Input Action */
+  UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+  UInputAction* TakeGrenadeInHandAction;
+
 public:
 	APracticeCharacter();
 
@@ -67,11 +84,11 @@ public:
 
 	/** Setter to set the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void SetHasRifle(bool bNewHasRifle);
+	void SetRifle(UTP_WeaponComponent* NewRifle);
 
 	/** Getter for the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
-	bool GetHasRifle();
+  UTP_WeaponComponent* GetRifle();
 
   /** Ammo counter **/
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
@@ -98,14 +115,26 @@ public:
   bool TryToConsumeAmmo(int RequestedAmmoAmount);
 
 protected:
-	/** Called for movement input */
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+  TWeakObjectPtr<UTP_WeaponComponent> CachedRifle;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+  TWeakObjectPtr<UTP_WeaponComponent> CachedGrenade;
+
+  /** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
   /** Called for pause input */
-  void Pause(const FInputActionValue& Value);
+  void Pause();
+
+  /** Called for TakeRiflInHand input */
+  void TakeRiflInHand();
+
+  /** Called for TakeGrenadeInHand input */
+  void TakeGrenadeInHand();
 
 protected:
 	// APawn interface
@@ -115,6 +144,7 @@ protected:
 public:
 	/** Returns Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
+
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 

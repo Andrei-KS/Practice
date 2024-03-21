@@ -112,8 +112,8 @@ void UTP_WeaponComponent::AttachWeaponToInventory()
   }
 
   FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-  AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("InvetoryPoint")));
-  SetVisibility(false, true);
+  AttachToComponent(Character->GetMesh(), AttachmentRules, FName(TEXT("InvetoryPoint")));
+  SetVisibility(false, false);
 }
 
 void UTP_WeaponComponent::EnableWeapon()

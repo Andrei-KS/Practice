@@ -3,14 +3,31 @@
 
 #include "PlayerHUD.h"
 #include "Components/TextBlock.h"
+#include "../PracticeCharacter.h"
 
-void UPlayerHUD::SetAmmo(int CurrentAmmoValue, int MaxAmmoValue)
+void UPlayerHUD::SetAmmo(EWeaponType Type, int CurrentAmmoValue, int MaxAmmoValue)
 {
-  if (IsValid(AmmoCounter))
+  if (IsValid(AmmoCounter) && IsValid(WeaponType))
   {
-    CurrentAmmo = CurrentAmmoValue;
-    MaxAmmo = MaxAmmoValue;
-    PlayAnimation(Increase, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f, false);
+    switch (Type)
+    {
+    case EWeaponType::None:
+      WeaponType->SetText(FText::FromString(FString::Printf(TEXT("None"))));
+      AmmoCounter->SetText(FText::FromString(FString::Printf(TEXT(""))));
+      break;
+    case EWeaponType::Rifle:
+      WeaponType->SetText(FText::FromString(FString::Printf(TEXT("Rifle"))));
+      CurrentAmmo = CurrentAmmoValue;
+      MaxAmmo = MaxAmmoValue;
+      PlayAnimation(Increase, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f, false);
+      break;
+    case EWeaponType::Grenade:
+      WeaponType->SetText(FText::FromString(FString::Printf(TEXT("Grenade"))));
+      AmmoCounter->SetText(FText::FromString(FString::Printf(TEXT("inf"))));
+      break;
+    default:
+      break;
+    }
   }
 }
 

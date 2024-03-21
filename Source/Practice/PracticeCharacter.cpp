@@ -15,6 +15,7 @@
 #include "UI/PauseMenu.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "TP_WeaponComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -75,7 +76,7 @@ void APracticeCharacter::BeginPlay()
     PlayerHUD = CreateWidget<UPlayerHUD>(PPC, PlayerHUDClass);
     check(PlayerHUD);
     PlayerHUD->AddToPlayerScreen();
-    PlayerHUD->SetAmmo(AmmoAmount, MaxAmmoAmount);
+    PlayerHUD->SetAmmo(EWeaponType::None, AmmoAmount, MaxAmmoAmount);
   }
 }
 
@@ -111,6 +112,12 @@ void APracticeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
     // Pause
     EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &APracticeCharacter::Pause);
+    
+    // TakeRiflInHand
+    EnhancedInputComponent->BindAction(TakeRiflInHandAction, ETriggerEvent::Triggered, this, &APracticeCharacter::TakeRiflInHand);
+    
+    // TakeGrenadeInHand
+    EnhancedInputComponent->BindAction(TakeGrenadeInHandAction, ETriggerEvent::Triggered, this, &APracticeCharacter::TakeGrenadeInHand);
 
 	}
 	else
@@ -146,7 +153,36 @@ void APracticeCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void APracticeCharacter::Pause(const FInputActionValue& Value)
+void APracticeCharacter::TakeRiflInHand()
+{
+  if (!bHasRifle && CachedRifle.IsValid())
+  {
+    bHasRifle = true;
+    CachedRifle->AttachWeaponToHand();
+    CachedRifle->EnableWeapon();
+    if (IsValid(PlayerHUD))
+    {
+      PlayerHUD->SetAmmo(EWeaponType::Rifle, AmmoAmount, MaxAmmoAmount);
+    }
+  }
+}
+
+void APracticeCharacter::TakeGrenadeInHand()
+{
+  if (bHasRifle && CachedRifle.IsValid())
+  {
+    bHasRifle = false;
+    CachedRifle->AttachWeaponToInventory();
+    CachedRifle->DisabaleWeapon();
+  }
+
+  if (IsValid(PlayerHUD))
+  {
+    PlayerHUD->SetAmmo(EWeaponType::Grenade, 0, 0);
+  }
+}
+
+void APracticeCharacter::Pause()
 {
   if (!UGameplayStatics::IsGamePaused(GetWorld()))
   {
@@ -163,14 +199,19 @@ void APracticeCharacter::Pause(const FInputActionValue& Value)
   }
 }
 
-void APracticeCharacter::SetHasRifle(bool bNewHasRifle)
+void APracticeCharacter::SetRifle(UTP_WeaponComponent* NewRifle)
 {
-	bHasRifle = bNewHasRifle;
+  bHasRifle = true;
+  CachedRifle = NewRifle;
+  if (IsValid(PlayerHUD))
+  {
+    PlayerHUD->SetAmmo(EWeaponType::Rifle, AmmoAmount, MaxAmmoAmount);
+  }
 }
 
-bool APracticeCharacter::GetHasRifle()
+UTP_WeaponComponent* APracticeCharacter::GetRifle()
 {
-	return bHasRifle;
+	return CachedRifle.Get();
 }
 
 int APracticeCharacter::GetAmmoAmount()
@@ -191,9 +232,9 @@ void APracticeCharacter::AddAmmo(int AdditionAmmoAmount)
     AmmoAmount = MaxAmmoAmount;
   }
 
-  if (IsValid(PlayerHUD))
+  if (IsValid(PlayerHUD) && CachedRifle.IsValid())
   {
-    PlayerHUD->SetAmmo(AmmoAmount, MaxAmmoAmount);
+    PlayerHUD->SetAmmo(EWeaponType::Rifle, AmmoAmount, MaxAmmoAmount);
   }
 
   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("APracticeCharacter::AddAmmo. AdditionAmmoAmount %d, in inventary %d"), AdditionAmmoAmount, AmmoAmount));
@@ -208,7 +249,7 @@ bool APracticeCharacter::TryToConsumeAmmo(int RequestedAmmoAmount)
     AmmoAmount -= RequestedAmmoAmount;
     if (IsValid(PlayerHUD))
     {
-      PlayerHUD->SetAmmo(AmmoAmount, MaxAmmoAmount);
+      PlayerHUD->SetAmmo(EWeaponType::Rifle ,AmmoAmount, MaxAmmoAmount);
     }
     return true;
   }

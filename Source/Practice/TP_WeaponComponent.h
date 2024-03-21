@@ -45,6 +45,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void AttachWeapon(APracticeCharacter* TargetCharacter);
 
+  /** Attaches the actor to a FirstPersonCharacter hand */
+  UFUNCTION(BlueprintCallable, Category = "Weapon")
+  void AttachWeaponToHand();
+
+  /** Attaches the actor to a FirstPersonCharacter hand */
+  UFUNCTION(BlueprintCallable, Category = "Weapon")
+  void AttachWeaponToInventory();
+
+  /** Enabale weapon */
+  void EnableWeapon();
+
+  /** Disenabale weapon */
+  void DisabaleWeapon();
+
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void Fire();
