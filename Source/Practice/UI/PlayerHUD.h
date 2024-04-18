@@ -7,6 +7,8 @@
 #include "PlayerHUD.generated.h"
 
 enum class EWeaponType : uint8;
+class UBusSubsystemEventHandler;
+class UBusSubsystemEvent;
 
 /**
  * 
@@ -18,7 +20,8 @@ class PRACTICE_API UPlayerHUD : public UUserWidget
 	
 public:
   /** Update HUD with current ammo. */
-  void SetAmmo(EWeaponType Type, int CurrentAmmoValue, int MaxAmmoValue);
+  UFUNCTION()
+  void UpdateWeaponUI(UBusSubsystemEvent* Event);
 
   /** Widgit to use to display current ammo. */
   UPROPERTY(EditAnywhere, meta = (BindWidget))
@@ -42,6 +45,9 @@ protected:
   FWidgetAnimationDynamicEvent EndDelegate;
 
 private:
+  UPROPERTY(EditAnywhere)
+  TObjectPtr<UBusSubsystemEventHandler> WeaponUIHadler;
+
   UFUNCTION()
   void AnimationStarted();
 

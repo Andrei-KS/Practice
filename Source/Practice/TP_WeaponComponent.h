@@ -8,6 +8,14 @@
 
 class APracticeCharacter;
 
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+  None = 0,
+  Rifle,
+  Grenade,
+};
+
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PRACTICE_API UTP_WeaponComponent : public USkeletalMeshComponent
 {

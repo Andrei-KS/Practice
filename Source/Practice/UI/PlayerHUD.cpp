@@ -3,13 +3,17 @@
 
 #include "PlayerHUD.h"
 #include "Components/TextBlock.h"
+#include "../EventBusSubsystem/BusSubsystemEventHandler.h"
+#include "../EventBusSubsystem/BusSubsystemEvent.h"
 #include "../PracticeCharacter.h"
+#include "../TP_WeaponComponent.h"
 
-void UPlayerHUD::SetAmmo(EWeaponType Type, int CurrentAmmoValue, int MaxAmmoValue)
+void UPlayerHUD::UpdateWeaponUI(UBusSubsystemEvent* Event)
 {
+  UWeaponUIBusSubsystemEvent* UWUIEvents = static_cast<UWeaponUIBusSubsystemEvent*>(Event);
   if (IsValid(AmmoCounter) && IsValid(WeaponType))
   {
-    switch (Type)
+    switch (UWUIEvents->WeaponType)
     {
     case EWeaponType::None:
       WeaponType->SetText(FText::FromString(FString::Printf(TEXT("None"))));
@@ -17,8 +21,8 @@ void UPlayerHUD::SetAmmo(EWeaponType Type, int CurrentAmmoValue, int MaxAmmoValu
       break;
     case EWeaponType::Rifle:
       WeaponType->SetText(FText::FromString(FString::Printf(TEXT("Rifle"))));
-      CurrentAmmo = CurrentAmmoValue;
-      MaxAmmo = MaxAmmoValue;
+      CurrentAmmo = UWUIEvents->AmmoAmount;
+      MaxAmmo = UWUIEvents->MaxAmmoAmount;
       PlayAnimation(Increase, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f, false);
       break;
     case EWeaponType::Grenade:
@@ -43,6 +47,9 @@ void UPlayerHUD::NativeConstruct()
 
   CurrentAmmo = 0;
   MaxAmmo = 0;
+
+  WeaponUIHadler = UBusSubsystemEventHandler::Make<UWeaponUIBusSubsystemEvent>(this);
+  WeaponUIHadler->OnHandledEvent.AddDynamic(this,&UPlayerHUD::UpdateWeaponUI);
 }
 
 void UPlayerHUD::AnimationStarted()

@@ -17,14 +17,6 @@ class UTP_WeaponComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
-UENUM(BlueprintType)
-enum class EWeaponType : uint8
-{
-  None = 0,
-  Rifle,
-  Grenade,
-};
-
 UCLASS(config=Game)
 class APracticeCharacter : public ACharacter
 {
@@ -135,6 +127,9 @@ protected:
 
   /** Called for TakeGrenadeInHand input */
   void TakeGrenadeInHand();
+
+  /** */
+  void UpdateWeaponUI();
 
 protected:
 	// APawn interface

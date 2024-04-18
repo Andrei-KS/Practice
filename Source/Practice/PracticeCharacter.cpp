@@ -17,6 +17,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "TP_WeaponComponent.h"
 
+#include "EventBusSubsystem/BusSubsystemEvent.h"
+
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
@@ -76,7 +78,9 @@ void APracticeCharacter::BeginPlay()
     PlayerHUD = CreateWidget<UPlayerHUD>(PPC, PlayerHUDClass);
     check(PlayerHUD);
     PlayerHUD->AddToPlayerScreen();
-    PlayerHUD->SetAmmo(EWeaponType::None, AmmoAmount, MaxAmmoAmount);
+    // TODO: add UpdateWeaponUI()
+    TObjectPtr<UWeaponUIBusSubsystemEvent> eventWUIBE = UBusSubsystemEvent::Make<UWeaponUIBusSubsystemEvent>(this);
+    eventWUIBE->Send();
   }
 }
 
@@ -162,7 +166,12 @@ void APracticeCharacter::TakeRiflInHand()
     CachedRifle->EnableWeapon();
     if (IsValid(PlayerHUD))
     {
-      PlayerHUD->SetAmmo(EWeaponType::Rifle, AmmoAmount, MaxAmmoAmount);
+      // TODO: add UpdateWeaponUI()
+      TObjectPtr<UWeaponUIBusSubsystemEvent> eventWUIBE = UBusSubsystemEvent::Make<UWeaponUIBusSubsystemEvent>(this);
+      eventWUIBE->WeaponType = EWeaponType::Rifle;
+      eventWUIBE->AmmoAmount = AmmoAmount;
+      eventWUIBE->MaxAmmoAmount = MaxAmmoAmount;
+      eventWUIBE->Send();
     }
   }
 }
@@ -178,8 +187,23 @@ void APracticeCharacter::TakeGrenadeInHand()
 
   if (IsValid(PlayerHUD))
   {
-    PlayerHUD->SetAmmo(EWeaponType::Grenade, 0, 0);
+    // TODO: add UpdateWeaponUI()
+    TObjectPtr<UWeaponUIBusSubsystemEvent> eventWUIBE = UBusSubsystemEvent::Make<UWeaponUIBusSubsystemEvent>(this);
+    eventWUIBE.Get()->WeaponType = EWeaponType::Grenade;
+    eventWUIBE.Get()->Send();
+    GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("APracticeCharacter::BeginPlay made eventWUIBE of %d"), eventWUIBE->GetEventType()));
   }
+}
+
+void APracticeCharacter::UpdateWeaponUI()
+{
+  //TODO: need to add possibility work with different EWeaponType
+  TObjectPtr<UWeaponUIBusSubsystemEvent> eventWUIBE = UBusSubsystemEvent::Make<UWeaponUIBusSubsystemEvent>(this);
+  eventWUIBE->WeaponType = EWeaponType::Rifle;
+  eventWUIBE->AmmoAmount = AmmoAmount;
+  eventWUIBE->MaxAmmoAmount = MaxAmmoAmount;
+  eventWUIBE->Send();
+  GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("APracticeCharacter::BeginPlay made eventWUIBE of %d"), eventWUIBE->GetEventType()));
 }
 
 void APracticeCharacter::Pause()
@@ -205,7 +229,7 @@ void APracticeCharacter::SetRifle(UTP_WeaponComponent* NewRifle)
   CachedRifle = NewRifle;
   if (IsValid(PlayerHUD))
   {
-    PlayerHUD->SetAmmo(EWeaponType::Rifle, AmmoAmount, MaxAmmoAmount);
+    UpdateWeaponUI();
   }
 }
 
@@ -226,6 +250,7 @@ int APracticeCharacter::GetMaxAmmoAmount()
 
 void APracticeCharacter::AddAmmo(int AdditionAmmoAmount)
 {
+  GetGameInstance();
   AmmoAmount += AdditionAmmoAmount;
   if (AmmoAmount > MaxAmmoAmount)
   {
@@ -234,7 +259,7 @@ void APracticeCharacter::AddAmmo(int AdditionAmmoAmount)
 
   if (IsValid(PlayerHUD) && CachedRifle.IsValid())
   {
-    PlayerHUD->SetAmmo(EWeaponType::Rifle, AmmoAmount, MaxAmmoAmount);
+    UpdateWeaponUI();
   }
 
   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("APracticeCharacter::AddAmmo. AdditionAmmoAmount %d, in inventary %d"), AdditionAmmoAmount, AmmoAmount));
@@ -249,7 +274,7 @@ bool APracticeCharacter::TryToConsumeAmmo(int RequestedAmmoAmount)
     AmmoAmount -= RequestedAmmoAmount;
     if (IsValid(PlayerHUD))
     {
-      PlayerHUD->SetAmmo(EWeaponType::Rifle ,AmmoAmount, MaxAmmoAmount);
+      UpdateWeaponUI();
     }
     return true;
   }
