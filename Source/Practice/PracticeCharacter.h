@@ -14,6 +14,7 @@ class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
 class UTP_WeaponComponent;
+enum class EWeaponType : uint8;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -72,15 +73,15 @@ public:
 
 	/** Bool for AnimBP to switch to another animation set */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
-	bool bHasRifle;
+	bool bIsRifleInHand;
 
 	/** Setter to set the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void SetRifle(UTP_WeaponComponent* NewRifle);
+	void SetWeapon(UTP_WeaponComponent* NewWeapon);
 
 	/** Getter for the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
-  UTP_WeaponComponent* GetRifle();
+  UTP_WeaponComponent* GetWeapon(EWeaponType WeaponType);
 
   /** Ammo counter **/
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
@@ -108,10 +109,7 @@ public:
 
 protected:
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
-  TWeakObjectPtr<UTP_WeaponComponent> CachedRifle;
-
-  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
-  TWeakObjectPtr<UTP_WeaponComponent> CachedGrenade;
+  TMap<EWeaponType, TSoftObjectPtr<UTP_WeaponComponent>> CachedWeapons;
 
   /** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -122,14 +120,14 @@ protected:
   /** Called for pause input */
   void Pause();
 
-  /** Called for TakeRiflInHand input */
-  void TakeRiflInHand();
+  /** Called for TakeRifleInHand input */
+  void TakeRifleInHand();
 
   /** Called for TakeGrenadeInHand input */
   void TakeGrenadeInHand();
 
   /** */
-  void UpdateWeaponUI();
+  void UpdateWeaponUI(EWeaponType Weapontype);
 
 protected:
 	// APawn interface

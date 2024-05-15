@@ -28,11 +28,11 @@ public:
 
 	/** Sound to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
-	USoundBase* FireSound;
+	USoundBase* UseSound;
 	
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* FireAnimation;
+	UAnimMontage* UseAnimation;
 
 	/** Gun muzzle's offset from the characters location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
@@ -40,43 +40,48 @@ public:
 
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputMappingContext* FireMappingContext;
+	class UInputMappingContext* UseMappingContext;
 
 	/** Fire Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* FireAction;
+	class UInputAction* UseAction;
 
 	/** Sets default values for this component's properties */
 	UTP_WeaponComponent();
 
 	/** Attaches the actor to a FirstPersonCharacter */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void AttachWeapon(APracticeCharacter* TargetCharacter);
+  virtual void AttachWeapon(APracticeCharacter* TargetCharacter);
 
   /** Attaches the actor to a FirstPersonCharacter hand */
   UFUNCTION(BlueprintCallable, Category = "Weapon")
-  void AttachWeaponToHand();
+  virtual void AttachWeaponToHand();
 
   /** Attaches the actor to a FirstPersonCharacter hand */
   UFUNCTION(BlueprintCallable, Category = "Weapon")
-  void AttachWeaponToInventory();
+  virtual void AttachWeaponToInventory();
+
+  UFUNCTION(BlueprintCallable, Category = "Weapon")
+  EWeaponType GetWeaponType() const { return WeaponType; };
 
   /** Enabale weapon */
-  void EnableWeapon();
+  virtual void EnableWeapon();
 
   /** Disenabale weapon */
-  void DisabaleWeapon();
+  virtual void DisabaleWeapon();
 
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
-	void Fire();
+	virtual void Use();
 
 protected:
 	/** Ends gameplay for this component. */
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-private:
 	/** The Character holding this weapon*/
 	APracticeCharacter* Character;
+
+  /** The Weapon Type is this weapon*/
+  EWeaponType WeaponType;
 };

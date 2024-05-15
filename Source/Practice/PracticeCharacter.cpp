@@ -27,7 +27,7 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 APracticeCharacter::APracticeCharacter()
 {
 	// Character doesnt have a rifle at start
-	bHasRifle = false;
+  bIsRifleInHand = false;
 	
   // Character doesnt have a ammo at start
   AmmoAmount = 0;
@@ -118,7 +118,7 @@ void APracticeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
     EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Triggered, this, &APracticeCharacter::Pause);
     
     // TakeRiflInHand
-    EnhancedInputComponent->BindAction(TakeRiflInHandAction, ETriggerEvent::Triggered, this, &APracticeCharacter::TakeRiflInHand);
+    EnhancedInputComponent->BindAction(TakeRiflInHandAction, ETriggerEvent::Triggered, this, &APracticeCharacter::TakeRifleInHand);
     
     // TakeGrenadeInHand
     EnhancedInputComponent->BindAction(TakeGrenadeInHandAction, ETriggerEvent::Triggered, this, &APracticeCharacter::TakeGrenadeInHand);
@@ -157,13 +157,14 @@ void APracticeCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void APracticeCharacter::TakeRiflInHand()
+void APracticeCharacter::TakeRifleInHand()
 {
-  if (!bHasRifle && CachedRifle.IsValid())
+  if (!bIsRifleInHand && CachedWeapons.Contains(EWeaponType::Rifle))
   {
-    bHasRifle = true;
-    CachedRifle->AttachWeaponToHand();
-    CachedRifle->EnableWeapon();
+    TSoftObjectPtr<UTP_WeaponComponent> Rifle = CachedWeapons[EWeaponType::Rifle];
+    bIsRifleInHand = true;
+    Rifle->AttachWeaponToHand();
+    Rifle->EnableWeapon();
     if (IsValid(PlayerHUD))
     {
       // TODO: add UpdateWeaponUI()
@@ -178,30 +179,42 @@ void APracticeCharacter::TakeRiflInHand()
 
 void APracticeCharacter::TakeGrenadeInHand()
 {
-  if (bHasRifle && CachedRifle.IsValid())
+  if (bIsRifleInHand && CachedWeapons.Contains(EWeaponType::Rifle))
   {
-    bHasRifle = false;
-    CachedRifle->AttachWeaponToInventory();
-    CachedRifle->DisabaleWeapon();
+    bIsRifleInHand = false;
+    TSoftObjectPtr<UTP_WeaponComponent> Rifle = CachedWeapons[EWeaponType::Rifle];
+    Rifle->AttachWeaponToInventory();
+    Rifle->DisabaleWeapon();
   }
 
   if (IsValid(PlayerHUD))
   {
     // TODO: add UpdateWeaponUI()
     TObjectPtr<UWeaponUIBusSubsystemEvent> eventWUIBE = UBusSubsystemEvent::Make<UWeaponUIBusSubsystemEvent>(this);
-    eventWUIBE.Get()->WeaponType = EWeaponType::Grenade;
-    eventWUIBE.Get()->Send();
+    UpdateWeaponUI(EWeaponType::Grenade);
     GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("APracticeCharacter::BeginPlay made eventWUIBE of %d"), eventWUIBE->GetEventType()));
   }
 }
 
-void APracticeCharacter::UpdateWeaponUI()
+void APracticeCharacter::UpdateWeaponUI(EWeaponType Weapontype)
 {
-  //TODO: need to add possibility work with different EWeaponType
   TObjectPtr<UWeaponUIBusSubsystemEvent> eventWUIBE = UBusSubsystemEvent::Make<UWeaponUIBusSubsystemEvent>(this);
-  eventWUIBE->WeaponType = EWeaponType::Rifle;
-  eventWUIBE->AmmoAmount = AmmoAmount;
-  eventWUIBE->MaxAmmoAmount = MaxAmmoAmount;
+  eventWUIBE->WeaponType = Weapontype;
+  switch (Weapontype)
+  {
+  case EWeaponType::None:
+    break;
+  case EWeaponType::Rifle:
+    eventWUIBE->AmmoAmount = AmmoAmount;
+    eventWUIBE->MaxAmmoAmount = MaxAmmoAmount;
+    break;
+  case EWeaponType::Grenade:
+    eventWUIBE->Send();
+    break;
+  default:
+    break;
+  }
+
   eventWUIBE->Send();
   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("APracticeCharacter::BeginPlay made eventWUIBE of %d"), eventWUIBE->GetEventType()));
 }
@@ -223,19 +236,33 @@ void APracticeCharacter::Pause()
   }
 }
 
-void APracticeCharacter::SetRifle(UTP_WeaponComponent* NewRifle)
+void APracticeCharacter::SetWeapon(UTP_WeaponComponent* NewWeapon)
 {
-  bHasRifle = true;
-  CachedRifle = NewRifle;
+  if (NewWeapon == nullptr)
+  {
+    return;
+  }
+
+  CachedWeapons.Add(NewWeapon->GetWeaponType(), NewWeapon);
+  
+  if (NewWeapon->GetWeaponType() == EWeaponType::Rifle)
+  {
+    bIsRifleInHand = true;
+  }
+  
   if (IsValid(PlayerHUD))
   {
-    UpdateWeaponUI();
+    UpdateWeaponUI(NewWeapon->GetWeaponType());
   }
 }
 
-UTP_WeaponComponent* APracticeCharacter::GetRifle()
+UTP_WeaponComponent* APracticeCharacter::GetWeapon(EWeaponType WeaponType)
 {
-	return CachedRifle.Get();
+  if (CachedWeapons.Contains(WeaponType))
+  {
+    return CachedWeapons[WeaponType].Get();
+  }
+	return nullptr;
 }
 
 int APracticeCharacter::GetAmmoAmount()
@@ -257,9 +284,9 @@ void APracticeCharacter::AddAmmo(int AdditionAmmoAmount)
     AmmoAmount = MaxAmmoAmount;
   }
 
-  if (IsValid(PlayerHUD) && CachedRifle.IsValid())
+  if (IsValid(PlayerHUD) && CachedWeapons.Contains(EWeaponType::Rifle))
   {
-    UpdateWeaponUI();
+    UpdateWeaponUI(EWeaponType::Rifle);
   }
 
   GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("APracticeCharacter::AddAmmo. AdditionAmmoAmount %d, in inventary %d"), AdditionAmmoAmount, AmmoAmount));
@@ -274,7 +301,7 @@ bool APracticeCharacter::TryToConsumeAmmo(int RequestedAmmoAmount)
     AmmoAmount -= RequestedAmmoAmount;
     if (IsValid(PlayerHUD))
     {
-      UpdateWeaponUI();
+      UpdateWeaponUI(EWeaponType::Rifle);
     }
     return true;
   }

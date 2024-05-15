@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Practic_GrenadeComponent.h"
+#include "Practic_RifleComponent.h"
 #include "PracticeCharacter.h"
 #include "PracticeProjectile.h"
 #include "GameFramework/PlayerController.h"
@@ -11,21 +11,24 @@
 #include "EnhancedInputSubsystems.h"
 
 // Sets default values for this component's properties
-UPractic_GrenadeComponent::UPractic_GrenadeComponent()
+UPractic_RifleComponent::UPractic_RifleComponent()
 {
-  WeaponType = EWeaponType::Grenade;
+  WeaponType = EWeaponType::Rifle;
+
   // Default offset from the character location for projectiles to spawn
   MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
 }
 
-void UPractic_GrenadeComponent::Use()
+
+void UPractic_RifleComponent::Use()
 {
-  if (Character == nullptr || Character->GetController() == nullptr)
+  Super::Use();
+  if (!Character->TryToConsumeAmmo(1))
   {
     return;
   }
 
-  // Try and throw a projectile
+  // Try and fire a projectile
   if (ProjectileClass != nullptr)
   {
     UWorld* const World = GetWorld();
@@ -44,4 +47,23 @@ void UPractic_GrenadeComponent::Use()
       World->SpawnActor<APracticeProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
     }
   }
+
+  // Try and play the sound if specified
+  if (UseSound != nullptr)
+  {
+    UGameplayStatics::PlaySoundAtLocation(this, UseSound, Character->GetActorLocation());
+  }
+
+  // Try and play a firing animation if specified
+  if (UseAnimation != nullptr)
+  {
+    // Get the animation object for the arms mesh
+    UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
+    if (AnimInstance != nullptr)
+    {
+      AnimInstance->Montage_Play(UseAnimation, 1.f);
+    }
+  }
 }
+
+

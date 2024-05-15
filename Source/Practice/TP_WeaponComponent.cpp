@@ -13,53 +13,18 @@
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
 {
+  WeaponType = EWeaponType::None;
+
 	// Default offset from the character location for projectiles to spawn
 	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
 }
 
 
-void UTP_WeaponComponent::Fire()
+void UTP_WeaponComponent::Use()
 {
-	if (Character == nullptr || Character->GetController() == nullptr || !Character->TryToConsumeAmmo(1))
+	if (Character == nullptr || Character->GetController() == nullptr)
 	{
 		return;
-	}
-
-	// Try and fire a projectile
-	if (ProjectileClass != nullptr)
-	{
-		UWorld* const World = GetWorld();
-		if (World != nullptr)
-		{
-			APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
-			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
-			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
-	
-			//Set Spawn Collision Handling Override
-			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-	
-			// Spawn the projectile at the muzzle
-			World->SpawnActor<APracticeProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-		}
-	}
-	
-	// Try and play the sound if specified
-	if (FireSound != nullptr)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, Character->GetActorLocation());
-	}
-	
-	// Try and play a firing animation if specified
-	if (FireAnimation != nullptr)
-	{
-		// Get the animation object for the arms mesh
-		UAnimInstance* AnimInstance = Character->GetMesh1P()->GetAnimInstance();
-		if (AnimInstance != nullptr)
-		{
-			AnimInstance->Montage_Play(FireAnimation, 1.f);
-		}
 	}
 }
 
@@ -68,7 +33,7 @@ void UTP_WeaponComponent::AttachWeapon(APracticeCharacter* TargetCharacter)
 	Character = TargetCharacter;
 
 	// Check that the character is valid, and has no rifle yet
-	if (Character == nullptr || Character->GetRifle() != nullptr)
+	if (Character == nullptr || Character->GetWeapon(WeaponType) != nullptr)
 	{
 		return;
 	}
@@ -77,7 +42,7 @@ void UTP_WeaponComponent::AttachWeapon(APracticeCharacter* TargetCharacter)
   AttachWeaponToHand();
 	
 	// switch bHasRifle so the animation blueprint can switch to another animation set
-	Character->SetRifle(this);
+	Character->SetWeapon(this);
 
   // Set up action bindings
   if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
@@ -85,7 +50,7 @@ void UTP_WeaponComponent::AttachWeapon(APracticeCharacter* TargetCharacter)
     if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
     {
       // Fire
-      EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Fire);
+      EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Use);
     }
   }
 
@@ -118,7 +83,7 @@ void UTP_WeaponComponent::AttachWeaponToInventory()
 
 void UTP_WeaponComponent::EnableWeapon()
 {
-  if (Character == nullptr || Character->GetRifle() == nullptr)
+  if (Character == nullptr || Character->GetWeapon(WeaponType) == nullptr)
   {
     return;
   }
@@ -129,7 +94,7 @@ void UTP_WeaponComponent::EnableWeapon()
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
     {
       // Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
-      Subsystem->AddMappingContext(FireMappingContext, 1);
+      Subsystem->AddMappingContext(UseMappingContext, 1);
     }
   }
 }
@@ -145,7 +110,7 @@ void UTP_WeaponComponent::DisabaleWeapon()
   {
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
     {
-      Subsystem->RemoveMappingContext(FireMappingContext);
+      Subsystem->RemoveMappingContext(UseMappingContext);
     }
   }
 }

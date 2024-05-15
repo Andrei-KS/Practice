@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Engine/GameInstance.h"
 #include "BusSubsystemEvent.h"
+#include "Engine/GameInstance.h"
 #include "EventBusSubsystem.h"
 #include "../TP_WeaponComponent.h"
 
