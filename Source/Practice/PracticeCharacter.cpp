@@ -264,15 +264,19 @@ void APracticeCharacter::SetWeapon(UTP_WeaponComponent* NewWeapon)
     return;
   }
 
+  if (CachedWeapons.Contains(NewWeapon->GetWeaponType()))
+  {
+    return;
+  }
+
   CachedWeapons.Add(NewWeapon->GetWeaponType(), NewWeapon);
-  
+  HideWeapon(CurrentWeaponTypeInHand);
+  CurrentWeaponTypeInHand = NewWeapon->GetWeaponType();
+
   if (NewWeapon->GetWeaponType() == EWeaponType::Rifle)
   {
     bIsRifleInHand = true;
   }
-  
-  HideWeapon(CurrentWeaponTypeInHand);
-  CurrentWeaponTypeInHand = NewWeapon->GetWeaponType();
 
   if (IsValid(PlayerHUD))
   {
