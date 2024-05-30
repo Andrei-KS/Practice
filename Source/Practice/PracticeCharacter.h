@@ -111,6 +111,8 @@ protected:
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
   TMap<EWeaponType, TSoftObjectPtr<UTP_WeaponComponent>> CachedWeapons;
 
+  EWeaponType CurrentWeaponTypeInHand;
+
   /** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
@@ -125,6 +127,9 @@ protected:
 
   /** Called for TakeGrenadeInHand input */
   void TakeGrenadeInHand();
+
+  /** Hide weapon from hand*/
+  void HideWeapon(EWeaponType Weapontype);
 
   /** */
   void UpdateWeaponUI(EWeaponType Weapontype);

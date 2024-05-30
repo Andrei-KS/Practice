@@ -44,4 +44,10 @@ void UPractic_GrenadeComponent::Use()
       World->SpawnActor<APracticeProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
     }
   }
+
+  // Try and play the sound if specified
+  if (UseSound != nullptr)
+  {
+    UGameplayStatics::PlaySoundAtLocation(this, UseSound, Character->GetActorLocation());
+  }
 }

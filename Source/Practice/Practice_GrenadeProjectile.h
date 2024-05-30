@@ -3,42 +3,41 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "PracticeProjectile.h"
 #include "Practice_GrenadeProjectile.generated.h"
 
-class USphereComponent;
-class UProjectileMovementComponent;
+// Forward declare this class, so the header file knows it is valid
+class UNiagaraSystem;
 class UDamageComponent;
 
 UCLASS()
-class PRACTICE_API APractice_GrenadeProjectile : public AActor
+class PRACTICE_API APractice_GrenadeProjectile : public APracticeProjectile
 {
 	GENERATED_BODY()
-	
-  /** Sphere collision component */
-  UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-  USphereComponent* CollisionComp;
-
-  /** Projectile movement component */
-  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-  UProjectileMovementComponent* ProjectileMovement;
 
   /** Damage component */
-  UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-  UDamageComponent* DamageComponent;
+  UPROPERTY(VisibleDefaultsOnly, Category = "Grenade")
+  UDamageComponent* ExplodionDamageComponent;
 
-public:	
-	// Sets default values for this actor's properties
+public:
   APractice_GrenadeProjectile();
 
-  /** called when projectile hits something */
-  UFUNCTION()
-  void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+protected:
+  /** Setup character when game starts. */
+  virtual void BeginPlay();
 
-  /** Returns CollisionComp subobject **/
-  USphereComponent* GetCollisionComp() const { return CollisionComp; }
+  // This enables the user to pick any Niagara System in the component's Blueprint Details panel in the editor
+  /** Muzzle flash effect, leave empty if none is desired */
+  UPROPERTY(EditDefaultsOnly, Category = "Grenade")
+  UNiagaraSystem* FireEffectMuzzle;
+  
+  UPROPERTY(EditDefaultsOnly, Category = "Grenade")
+  float FuseLenght;
 
-  /** Returns ProjectileMovement subobject **/
-  UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
+  UPROPERTY(EditDefaultsOnly, Category = "Grenade")
+  float ExplotionRadius;
 
+  virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
+
+  void Explode();
 };

@@ -12,5 +12,8 @@ public class Practice : ModuleRules
 		
     // UMG Depencies
     PublicDependencyModuleNames.AddRange(new string[] { "UMG", "Slate", "SlateCore"});
-	}
+
+    // Niagara Depencies
+    PublicDependencyModuleNames.AddRange(new string[] { "Niagara" });
+  }
 }

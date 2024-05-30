@@ -54,6 +54,5 @@ void APractice_GrenadeProjectile::Explode()
   // Finally iterate over the outActor array
   for (AActor* overlappedActor : outActors) {
     UE_LOG(LogTemp, Warning, TEXT("Exploded an Actor: %s"), *overlappedActor->GetName());
-    ExplodionDamageComponent->ApplyDamageTo(overlappedActor);
   }
 }

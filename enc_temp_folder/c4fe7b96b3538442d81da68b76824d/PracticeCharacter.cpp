@@ -214,7 +214,6 @@ void APracticeCharacter::HideWeapon(EWeaponType Weapontype)
     Weapon->DisabaleWeapon();
     CurrentWeaponTypeInHand = EWeaponType::None;
     UpdateWeaponUI(EWeaponType::None);
-    bIsRifleInHand = false;
   }
 }
 
