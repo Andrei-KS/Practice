@@ -18,6 +18,12 @@ UPractic_GrenadeComponent::UPractic_GrenadeComponent()
   MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
 }
 
+void UPractic_GrenadeComponent::AttachWeapon(APracticeCharacter* TargetCharacter)
+{
+  Super::AttachWeapon(TargetCharacter);
+  SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
+}
+
 void UPractic_GrenadeComponent::Use()
 {
   if (Character == nullptr || Character->GetController() == nullptr)

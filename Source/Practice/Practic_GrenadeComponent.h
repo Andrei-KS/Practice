@@ -17,6 +17,9 @@ public:
 	// Sets default values for this component's properties
 	UPractic_GrenadeComponent();
 
+  /** Attaches the actor to a FirstPersonCharacter */
+  virtual void AttachWeapon(APracticeCharacter* TargetCharacter) override;
+
   /** Make the weapon Use a Projectile */
   virtual void Use() override;
 
