@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/DamageComponent.h"
+#include "Components/SplineComponent.h"
 
 APractice_GrenadeProjectile::APractice_GrenadeProjectile()
 {
@@ -16,6 +17,17 @@ APractice_GrenadeProjectile::APractice_GrenadeProjectile()
 
   // Use DamageComponent to applay damage to other actor that contain health component
   ExplodionDamageComponent = CreateDefaultSubobject<UDamageComponent>(TEXT("ExplodionDamageComponent"));
+
+  TraveledPathSplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("TraveledPathSplineComponent"));
+  TraveledPathSplineComponent->SetupAttachment(RootComponent);
+}
+
+void APractice_GrenadeProjectile::Tick(float DeltaSeconds)
+{
+  Super::Tick(DeltaSeconds);
+  TraveledPath.Push(GetCollisionComp()->GetComponentLocation());
+  TraveledPathSplineComponent->SetSplinePoints(TraveledPath, ESplineCoordinateSpace::World);
+  //TraveledPathSplineComponent->UpdateSpline();
 }
 
 void APractice_GrenadeProjectile::BeginPlay()

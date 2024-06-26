@@ -9,6 +9,7 @@
 // Forward declare this class, so the header file knows it is valid
 class UNiagaraSystem;
 class UDamageComponent;
+class USplineComponent;
 
 UCLASS()
 class PRACTICE_API APractice_GrenadeProjectile : public APracticeProjectile
@@ -21,6 +22,8 @@ class PRACTICE_API APractice_GrenadeProjectile : public APracticeProjectile
 
 public:
   APractice_GrenadeProjectile();
+
+  virtual void Tick(float DeltaSeconds) override;
 
 protected:
   /** Setup character when game starts. */
@@ -40,4 +43,13 @@ protected:
   virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 
   void Explode();
+
+  UPROPERTY(VisibleAnywhere, Category = "TraveledPath")
+  USplineComponent* TraveledPathSplineComponent;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TraveledPath")
+  UStaticMesh* SplaneMesh;
+
+private:
+  TArray<FVector> TraveledPath;
 };
