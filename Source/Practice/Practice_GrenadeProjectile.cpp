@@ -20,14 +20,24 @@ APractice_GrenadeProjectile::APractice_GrenadeProjectile()
 
   TraveledPathSplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("TraveledPathSplineComponent"));
   TraveledPathSplineComponent->SetupAttachment(RootComponent);
+
+  TraveledPathVisualEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("TraveledPathVisualEffect"));
+  TraveledPathVisualEffect->SetupAttachment(TraveledPathSplineComponent);
 }
 
 void APractice_GrenadeProjectile::Tick(float DeltaSeconds)
 {
   Super::Tick(DeltaSeconds);
-  TraveledPath.Push(GetCollisionComp()->GetComponentLocation());
-  TraveledPathSplineComponent->SetSplinePoints(TraveledPath, ESplineCoordinateSpace::World);
-  //TraveledPathSplineComponent->UpdateSpline();
+  FVector newPosition = GetCollisionComp()->GetComponentLocation();
+  if (TraveledPath.IsEmpty() || newPosition != TraveledPath.Last())
+  {
+    TraveledPath.Push(newPosition);
+    TraveledPathSplineComponent->SetSplinePoints(TraveledPath, ESplineCoordinateSpace::World);
+
+    // I don't understand why function AddSplinePoint and Vector(0,0,0), this spline is invalid
+    //TraveledPathSplineComponent->AddSplinePoint(GetCollisionComp()->GetComponentLocation(),ESplineCoordinateSpace::World);
+  }
+  
 }
 
 void APractice_GrenadeProjectile::BeginPlay()

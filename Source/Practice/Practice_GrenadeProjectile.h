@@ -8,6 +8,7 @@
 
 // Forward declare this class, so the header file knows it is valid
 class UNiagaraSystem;
+class UNiagaraComponent;
 class UDamageComponent;
 class USplineComponent;
 
@@ -46,6 +47,9 @@ protected:
 
   UPROPERTY(VisibleAnywhere, Category = "TraveledPath")
   USplineComponent* TraveledPathSplineComponent;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TraveledPath")
+  UNiagaraComponent* TraveledPathVisualEffect;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TraveledPath")
   UStaticMesh* SplaneMesh;
