@@ -9,6 +9,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/SplineComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 // Sets default values for this component's properties
 UPractic_GrenadeComponent::UPractic_GrenadeComponent()
@@ -16,11 +19,17 @@ UPractic_GrenadeComponent::UPractic_GrenadeComponent()
   WeaponType = EWeaponType::Grenade;
   // Default offset from the character location for projectiles to spawn
   MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
+
+  PredictedPathSplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("PredictedPathSplineComponent"));
+
+  PredictedPathVisualEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("PredictedPathVisualEffect"));
+  
 }
 
 void UPractic_GrenadeComponent::AttachWeapon(APracticeCharacter* TargetCharacter)
 {
   Super::AttachWeapon(TargetCharacter);
+
   SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
 }
 

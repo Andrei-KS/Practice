@@ -11,6 +11,7 @@ class UNiagaraSystem;
 class UNiagaraComponent;
 class UDamageComponent;
 class USplineComponent;
+class ATraveledPath;
 
 UCLASS()
 class PRACTICE_API APractice_GrenadeProjectile : public APracticeProjectile
@@ -22,6 +23,10 @@ class PRACTICE_API APractice_GrenadeProjectile : public APracticeProjectile
   UDamageComponent* ExplodionDamageComponent;
 
 public:
+  /** Traveled path class to spawn */
+  UPROPERTY(EditDefaultsOnly, Category = "TraveledPath")
+  TSubclassOf<ATraveledPath> TraveledPathClass;
+
   APractice_GrenadeProjectile();
 
   virtual void Tick(float DeltaSeconds) override;
@@ -46,14 +51,5 @@ protected:
   void Explode();
 
   UPROPERTY(VisibleAnywhere, Category = "TraveledPath")
-  USplineComponent* TraveledPathSplineComponent;
-
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TraveledPath")
-  UNiagaraComponent* TraveledPathVisualEffect;
-
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TraveledPath")
-  UStaticMesh* SplaneMesh;
-
-private:
-  TArray<FVector> TraveledPath;
+  TObjectPtr<ATraveledPath> TraveledPath;
 };

@@ -8,6 +8,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/DamageComponent.h"
 #include "Components/SplineComponent.h"
+#include "TraveledPath.h"
 
 APractice_GrenadeProjectile::APractice_GrenadeProjectile()
 {
@@ -17,26 +18,24 @@ APractice_GrenadeProjectile::APractice_GrenadeProjectile()
 
   // Use DamageComponent to applay damage to other actor that contain health component
   ExplodionDamageComponent = CreateDefaultSubobject<UDamageComponent>(TEXT("ExplodionDamageComponent"));
-
-  TraveledPathSplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("TraveledPathSplineComponent"));
-  TraveledPathSplineComponent->SetupAttachment(RootComponent);
-
-  TraveledPathVisualEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("TraveledPathVisualEffect"));
-  TraveledPathVisualEffect->SetupAttachment(TraveledPathSplineComponent);
 }
 
 void APractice_GrenadeProjectile::Tick(float DeltaSeconds)
 {
   Super::Tick(DeltaSeconds);
   FVector newPosition = GetCollisionComp()->GetComponentLocation();
-  if (TraveledPath.IsEmpty() || newPosition != TraveledPath.Last())
+  if (TraveledPath)
   {
-    TraveledPath.Push(newPosition);
-    TraveledPathSplineComponent->SetSplinePoints(TraveledPath, ESplineCoordinateSpace::World);
-
-    // I don't understand why function AddSplinePoint and Vector(0,0,0), this spline is invalid
-    //TraveledPathSplineComponent->AddSplinePoint(GetCollisionComp()->GetComponentLocation(),ESplineCoordinateSpace::World);
+    TraveledPath->GetTraveledPathSplineComponent()->AddSplineWorldPoint(GetCollisionComp()->GetComponentLocation());
   }
+  //if (TraveledPath.IsEmpty() || newPosition != TraveledPath.Last())
+  //{
+  //  TraveledPath.Push(newPosition);
+  //  //TraveledPathSplineComponent->SetSplinePoints(TraveledPath, ESplineCoordinateSpace::World);
+
+  //  // I don't understand why function AddSplinePoint and Vector(0,0,0), this spline is invalid
+  //  //TraveledPathSplineComponent->AddSplinePoint(GetCollisionComp()->GetComponentLocation(),ESplineCoordinateSpace::World);
+  //}
   
 }
 
@@ -45,6 +44,27 @@ void APractice_GrenadeProjectile::BeginPlay()
   Super::BeginPlay();
   FTimerHandle TExplodeHandle;
   GetWorldTimerManager().SetTimer(TExplodeHandle, this, &APractice_GrenadeProjectile::Explode, FuseLenght, false);
+
+  // Set TraveledPath
+  if (TraveledPathClass != nullptr)
+  {
+    UWorld* const World = GetWorld();
+    if (World != nullptr)
+    {
+
+      const FVector SpawnLocation = GetActorLocation();
+      const FRotator SpawnRotation = GetActorRotation();
+
+      FActorSpawnParameters ActorSpawnParams;
+      ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+
+      TraveledPath = World->SpawnActor<ATraveledPath>(TraveledPathClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+      //
+      //FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
+      //TraveledPathActor->SetRootComponent(TraveledPathSplineComponent);
+      ////TraveledPathSplineComponent->AttachToComponent(TraveledPathActor->GetRootComponent(), AttachmentRules);
+    }
+  }
 }
 
 void APractice_GrenadeProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -78,6 +98,6 @@ void APractice_GrenadeProjectile::Explode()
     UE_LOG(LogTemp, Warning, TEXT("Exploded an Actor: %s"), *overlappedActor->GetName());
     ExplodionDamageComponent->ApplyDamageTo(overlappedActor);
   }
-
+  TraveledPath->Destroy();
   Destroy();
 }
