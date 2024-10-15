@@ -28,15 +28,7 @@ void APractice_GrenadeProjectile::Tick(float DeltaSeconds)
   {
     TraveledPath->GetTraveledPathSplineComponent()->AddSplineWorldPoint(GetCollisionComp()->GetComponentLocation());
   }
-  //if (TraveledPath.IsEmpty() || newPosition != TraveledPath.Last())
-  //{
-  //  TraveledPath.Push(newPosition);
-  //  //TraveledPathSplineComponent->SetSplinePoints(TraveledPath, ESplineCoordinateSpace::World);
 
-  //  // I don't understand why function AddSplinePoint and Vector(0,0,0), this spline is invalid
-  //  //TraveledPathSplineComponent->AddSplinePoint(GetCollisionComp()->GetComponentLocation(),ESplineCoordinateSpace::World);
-  //}
-  
 }
 
 void APractice_GrenadeProjectile::BeginPlay()
@@ -59,10 +51,6 @@ void APractice_GrenadeProjectile::BeginPlay()
       ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
       TraveledPath = World->SpawnActor<ATraveledPath>(TraveledPathClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-      //
-      //FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
-      //TraveledPathActor->SetRootComponent(TraveledPathSplineComponent);
-      ////TraveledPathSplineComponent->AttachToComponent(TraveledPathActor->GetRootComponent(), AttachmentRules);
     }
   }
 }

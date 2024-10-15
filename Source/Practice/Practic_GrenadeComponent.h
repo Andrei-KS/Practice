@@ -25,12 +25,4 @@ public:
 
   /** Make the weapon Use a Projectile */
   virtual void Use() override;
-
-protected:
-  UPROPERTY(VisibleAnywhere, Category = "PredictedPath")
-  USplineComponent* PredictedPathSplineComponent;
-
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PredictedPath")
-  UNiagaraComponent* PredictedPathVisualEffect;
-
 };

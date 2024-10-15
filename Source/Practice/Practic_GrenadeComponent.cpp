@@ -19,11 +19,6 @@ UPractic_GrenadeComponent::UPractic_GrenadeComponent()
   WeaponType = EWeaponType::Grenade;
   // Default offset from the character location for projectiles to spawn
   MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
-
-  PredictedPathSplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("PredictedPathSplineComponent"));
-
-  PredictedPathVisualEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("PredictedPathVisualEffect"));
-  
 }
 
 void UPractic_GrenadeComponent::AttachWeapon(APracticeCharacter* TargetCharacter)
