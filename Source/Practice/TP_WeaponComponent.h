@@ -16,6 +16,18 @@ enum class EWeaponType : uint8
   Grenade,
 };
 
+USTRUCT(BlueprintType)
+struct FProjectileSpawnProperty
+{
+  GENERATED_BODY()
+  
+  UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+  FVector SpawnLocation;
+  
+  UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+  FRotator SpawnRotation;
+};
+
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PRACTICE_API UTP_WeaponComponent : public USkeletalMeshComponent
 {
@@ -69,6 +81,9 @@ public:
 
   /** Disenabale weapon */
   virtual void DisabaleWeapon();
+
+  /** return location and direction of projectile */
+  virtual FProjectileSpawnProperty GetProjectileSpawnProperty() const;
 
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Weapon")

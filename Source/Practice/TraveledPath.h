@@ -32,9 +32,6 @@ protected:
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TraveledPath")
   TObjectPtr<UNiagaraComponent> TraveledPathVisualEffect;
 
-  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TraveledPath")
-  UStaticMesh* SplaneMesh;
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

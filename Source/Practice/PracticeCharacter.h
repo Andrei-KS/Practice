@@ -14,6 +14,8 @@ class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
 class UTP_WeaponComponent;
+class USplineComponent;
+class UNiagaraComponent;
 enum class EWeaponType : uint8;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -61,6 +63,8 @@ public:
 protected:
   /** Setup character when game starts. */
 	virtual void BeginPlay();
+
+  virtual void Tick(float DeltaSecond) override;
 
   /** Cleanup character when game ends. */
   virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -128,6 +132,9 @@ protected:
   /** Called for TakeGrenadeInHand input */
   void TakeGrenadeInHand();
 
+  /** Take weapon in Hand*/
+  void TakeWeaponInHand(EWeaponType weaponType);
+
   /** Hide weapon from hand*/
   void HideWeapon(EWeaponType Weapontype);
 
@@ -166,5 +173,16 @@ protected:
   /** The widget instance that we are use as our Hud */
   UPROPERTY()
   class UPauseMenu* PauseMenu;
+
+  UPROPERTY(VisibleAnywhere, Category = "PredictProjectilePath")
+  TObjectPtr<USplineComponent> PredictProjectilePathSplineComponent;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PredictProjectilePath")
+  TObjectPtr<UNiagaraComponent> PredictProjectilePathVisualEffect;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PredictProjectilePath")
+  bool bIsCalculatePredictProjectilePath;
+  float PredictLaunchVelocity;
+  float ProjectileRadius;
 };
 

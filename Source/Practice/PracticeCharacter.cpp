@@ -17,6 +17,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "TP_WeaponComponent.h"
 #include "Practic_GrenadeComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+#include "Components/SplineComponent.h"
+
 
 #include "EventBusSubsystem/BusSubsystemEvent.h"
 
@@ -57,6 +61,17 @@ APracticeCharacter::APracticeCharacter()
   // HUD
   PlayerHUDClass = nullptr;
   PlayerHUD = nullptr;
+
+  //PredictProjectilePath
+  PredictProjectilePathSplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("PredictProjectilePathSplineComponent"));
+  PredictProjectilePathSplineComponent->SetupAttachment(GetRootComponent());
+  PredictProjectilePathSplineComponent->SetHiddenInGame(true, true);
+
+  PredictProjectilePathVisualEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("PredictProjectilePathVisualEffect"));
+  PredictProjectilePathVisualEffect->SetupAttachment(PredictProjectilePathSplineComponent);
+  bIsCalculatePredictProjectilePath = false;
+  PredictLaunchVelocity = 0;
+  ProjectileRadius = 20;
 }
 
 void APracticeCharacter::BeginPlay()
@@ -82,9 +97,31 @@ void APracticeCharacter::BeginPlay()
     PlayerHUD = CreateWidget<UPlayerHUD>(PPC, PlayerHUDClass);
     check(PlayerHUD);
     PlayerHUD->AddToPlayerScreen();
-    // TODO: add UpdateWeaponUI()
-    TObjectPtr<UWeaponUIBusSubsystemEvent> eventWUIBE = UBusSubsystemEvent::Make<UWeaponUIBusSubsystemEvent>(this);
-    eventWUIBE->Send();
+    UpdateWeaponUI(EWeaponType::None);
+  }
+}
+
+void APracticeCharacter::Tick(float DeltaSecond)
+{
+  Super::Tick(DeltaSecond);
+  if (bIsCalculatePredictProjectilePath)
+  {
+    FPredictProjectilePathParams PredictParams;
+    TSoftObjectPtr<UTP_WeaponComponent> pWeaponComponent = CachedWeapons[CurrentWeaponTypeInHand];
+    FProjectileSpawnProperty PSProperty = pWeaponComponent->GetProjectileSpawnProperty();
+    PredictParams.StartLocation = PSProperty.SpawnLocation;
+    PredictParams.LaunchVelocity = PSProperty.SpawnRotation.Vector() * PredictLaunchVelocity;
+    PredictParams.ProjectileRadius = ProjectileRadius;
+    FPredictProjectilePathResult PredictResult;
+    bool bHit = UGameplayStatics::PredictProjectilePath(GetWorld(), PredictParams, PredictResult);
+
+    TArray<FVector> PointLocation;
+    for (auto PathPoint : PredictResult.PathData)
+    {
+      PointLocation.Add(PathPoint.Location);
+    }
+
+    PredictProjectilePathSplineComponent->SetSplinePoints(PointLocation,ESplineCoordinateSpace::World);
   }
 }
 
@@ -163,46 +200,65 @@ void APracticeCharacter::Look(const FInputActionValue& Value)
 
 void APracticeCharacter::TakeRifleInHand()
 {
-  if (CurrentWeaponTypeInHand == EWeaponType::Rifle)
-  {
-    return;
-  }
-  HideWeapon(CurrentWeaponTypeInHand);
-
-  if (CachedWeapons.Contains(EWeaponType::Rifle))
-  {
-    TSoftObjectPtr<UTP_WeaponComponent> Rifle = CachedWeapons[EWeaponType::Rifle];
-    bIsRifleInHand = true;
-    Rifle->AttachWeaponToHand();
-    Rifle->EnableWeapon();
-    if (IsValid(PlayerHUD))
-    {
-      UpdateWeaponUI(EWeaponType::Rifle);
-    }
-    CurrentWeaponTypeInHand = EWeaponType::Rifle;
-  }
-
+  TakeWeaponInHand(EWeaponType::Rifle);
 }
 
 void APracticeCharacter::TakeGrenadeInHand()
 {
-  if (CurrentWeaponTypeInHand == EWeaponType::Grenade)
+  TakeWeaponInHand(EWeaponType::Grenade);
+}
+
+void APracticeCharacter::TakeWeaponInHand(EWeaponType weaponType)
+{
+  if (CurrentWeaponTypeInHand == weaponType)
   {
     return;
   }
+
   HideWeapon(CurrentWeaponTypeInHand);
 
-  if (CachedWeapons.Contains(EWeaponType::Grenade))
+  if (!CachedWeapons.Contains(weaponType))
   {
-    TSoftObjectPtr<UTP_WeaponComponent> Grenade = CachedWeapons[EWeaponType::Grenade];
-    Grenade->AttachWeaponToHand();
-    Grenade->EnableWeapon();
-    if (IsValid(PlayerHUD))
-    {
-      UpdateWeaponUI(EWeaponType::Grenade);
-    }
-    CurrentWeaponTypeInHand = EWeaponType::Grenade;
+    return;
   }
+
+  TSoftObjectPtr<UTP_WeaponComponent> pWeaponComponent = CachedWeapons[weaponType];
+  pWeaponComponent->AttachWeaponToHand();
+  pWeaponComponent->EnableWeapon();
+
+  if (IsValid(PlayerHUD))
+  {
+    UpdateWeaponUI(weaponType);
+  }
+
+  CurrentWeaponTypeInHand = weaponType;
+
+  switch (weaponType)
+  {
+  case EWeaponType::Rifle:
+  {
+    bIsRifleInHand = true;
+    //FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+    //PredictProjectilePathSplineComponent->AttachToComponent(pWeaponComponent.Get(), AttachmentRules,FName(TEXT("Muzzle")));
+    //PredictProjectilePathSplineComponent->SetHiddenInGame(false, true);
+    PredictLaunchVelocity = 3000;
+    ProjectileRadius = 20;
+    bIsCalculatePredictProjectilePath = true;
+  }
+  break;
+  case EWeaponType::Grenade:
+  {
+    //FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+    //PredictProjectilePathSplineComponent->AttachToComponent(pWeaponComponent.Get(), AttachmentRules, FName(TEXT("Muzzle")));
+    //PredictProjectilePathSplineComponent->SetHiddenInGame(false, true);
+    PredictLaunchVelocity = 500;
+    ProjectileRadius = 10;
+    bIsCalculatePredictProjectilePath = true;
+  }
+  break;
+  }
+
+
 }
 
 void APracticeCharacter::HideWeapon(EWeaponType Weapontype)
@@ -212,6 +268,12 @@ void APracticeCharacter::HideWeapon(EWeaponType Weapontype)
     TSoftObjectPtr<UTP_WeaponComponent> Weapon = CachedWeapons[Weapontype];
     Weapon->AttachWeaponToInventory();
     Weapon->DisabaleWeapon();
+
+    if (CurrentWeaponTypeInHand == EWeaponType::Grenade)
+    {
+      PredictProjectilePathSplineComponent->ClearSplinePoints();
+    }
+
     CurrentWeaponTypeInHand = EWeaponType::None;
     UpdateWeaponUI(EWeaponType::None);
     bIsRifleInHand = false;
@@ -270,18 +332,7 @@ void APracticeCharacter::SetWeapon(UTP_WeaponComponent* NewWeapon)
   }
 
   CachedWeapons.Add(NewWeapon->GetWeaponType(), NewWeapon);
-  HideWeapon(CurrentWeaponTypeInHand);
-  CurrentWeaponTypeInHand = NewWeapon->GetWeaponType();
-
-  if (NewWeapon->GetWeaponType() == EWeaponType::Rifle)
-  {
-    bIsRifleInHand = true;
-  }
-
-  if (IsValid(PlayerHUD))
-  {
-    UpdateWeaponUI(NewWeapon->GetWeaponType());
-  }
+  TakeWeaponInHand(NewWeapon->GetWeaponType());
 }
 
 UTP_WeaponComponent* APracticeCharacter::GetWeapon(EWeaponType WeaponType)
