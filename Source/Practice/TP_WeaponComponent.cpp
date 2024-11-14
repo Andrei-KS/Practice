@@ -128,4 +128,5 @@ FProjectileSpawnProperty UTP_WeaponComponent::GetProjectileSpawnProperty() const
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
   DisabaleWeapon();
+  Super::EndPlay(EndPlayReason);
 }
