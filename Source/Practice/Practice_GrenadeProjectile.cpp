@@ -9,6 +9,7 @@
 #include "Components/DamageComponent.h"
 #include "Components/SplineComponent.h"
 #include "TraveledPath.h"
+//#include <Kismet/GameplayStatics.h>
 
 APractice_GrenadeProjectile::APractice_GrenadeProjectile()
 {
@@ -76,15 +77,25 @@ void APractice_GrenadeProjectile::Explode()
 
   // Sphere's spawn loccation within the world
   FVector sphereSpawnLocation = GetActorLocation();
+  //UGameplayStatics::ApplyRadialDamage(GetWorld(),0, sphereSpawnLocation, ExplotionRadius,UDamageType::StaticClass(),ignoreActors,this,nullptr,false,ECollisionChannel::ECC_WorldStatic);
   UKismetSystemLibrary::SphereOverlapActors(GetWorld(), sphereSpawnLocation, ExplotionRadius, traceObjectTypes, NULL, ignoreActors, outActors);
 
   // Optional: Use to have a visual representation of the SphereOverlapActors
   DrawDebugSphere(GetWorld(), GetActorLocation(), ExplotionRadius, 12, FColor::Red, false, 5.0f);
 
   // Finally iterate over the outActor array
-  for (AActor* overlappedActor : outActors) {
-    UE_LOG(LogTemp, Warning, TEXT("Exploded an Actor: %s"), *overlappedActor->GetName());
-    ExplodionDamageComponent->ApplyDamageTo(overlappedActor);
+  for (AActor* overlappedActor : outActors) 
+  {
+    FHitResult HitResult;
+    ETraceTypeQuery TraceType = UEngineTypes::ConvertToTraceType(ECC_Visibility);
+    if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), sphereSpawnLocation, overlappedActor->GetActorLocation(), TraceType, true, TArray<AActor*>{this}, EDrawDebugTrace::Persistent, HitResult, true))
+    {
+      if (HitResult.Component->GetOwner() == overlappedActor)
+      {
+        UE_LOG(LogTemp, Warning, TEXT("Exploded an Actor: %s"), *overlappedActor->GetName());
+        ExplodionDamageComponent->ApplyDamageTo(overlappedActor);
+      }
+    }
   }
   TraveledPath->Destroy();
   Destroy();
