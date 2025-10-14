@@ -104,8 +104,9 @@ void APracticeCharacter::BeginPlay()
 void APracticeCharacter::Tick(float DeltaSecond)
 {
   Super::Tick(DeltaSecond);
-  if (bIsCalculatePredictProjectilePath)
+  if (bIsCalculatePredictProjectilePath && CurrentWeaponTypeInHand != EWeaponType::None)
   {
+    PredictProjectilePathSplineComponent->SetVisibility(true, true);
     FPredictProjectilePathParams PredictParams;
     TSoftObjectPtr<UTP_WeaponComponent> pWeaponComponent = CachedWeapons[CurrentWeaponTypeInHand];
     FProjectileSpawnProperty PSProperty = pWeaponComponent->GetProjectileSpawnProperty();
@@ -122,6 +123,10 @@ void APracticeCharacter::Tick(float DeltaSecond)
     }
 
     PredictProjectilePathSplineComponent->SetSplinePoints(PointLocation,ESplineCoordinateSpace::World);
+  }
+  else
+  {
+    PredictProjectilePathSplineComponent->SetVisibility(false, true);
   }
 }
 
