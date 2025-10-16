@@ -20,6 +20,16 @@ enum class EWeaponType : uint8;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
+namespace MyConsoleVariable
+{
+  static TAutoConsoleVariable<bool> bIsInfiniteRifleAmmo(
+    TEXT("bIsInfiniteRifleAmmo"),
+    true,
+    TEXT("Grant infinite rifle ammo"),
+    ECVF_Cheat
+  );
+}
+
 UCLASS(config=Game)
 class APracticeCharacter : public ACharacter
 {

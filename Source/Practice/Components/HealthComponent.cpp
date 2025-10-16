@@ -8,11 +8,11 @@ UHealthComponent::UHealthComponent()
 {
 }
 
-
 // Called when the game starts
 void UHealthComponent::BeginPlay()
 {
   Super::BeginPlay();
+  myConsoleCommand::OnDestroyAllThatHaveHealthComponentEvent.AddUObject(this, &UHealthComponent::HandleDestroyAllThatHaveHealthComponentEvent);
 }
 
 void UHealthComponent::ApplyDamage(int DamageValue)
@@ -43,4 +43,11 @@ void UHealthComponent::ApplyDamage(int DamageValue)
   }
 }
 
-
+void UHealthComponent::HandleDestroyAllThatHaveHealthComponentEvent()
+{
+  GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("UHealthComponent::HandleDestroyAllThatHaveHealthComponentEvent has been activated")));
+  if (OnDied.IsBound())
+  {
+    OnDied.Broadcast();
+  }
+}

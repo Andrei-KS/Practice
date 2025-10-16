@@ -378,6 +378,12 @@ void APracticeCharacter::AddAmmo(int AdditionAmmoAmount)
 
 bool APracticeCharacter::TryToConsumeAmmo(int RequestedAmmoAmount)
 {
+  if (MyConsoleVariable::bIsInfiniteRifleAmmo.GetValueOnGameThread() && CurrentWeaponTypeInHand == EWeaponType::Rifle)
+  {
+    GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("APracticeCharacter::TryToConsumeAmmo Granted infinity ammo"), RequestedAmmoAmount, AmmoAmount));
+    return true;
+  }
+
   // If the character has enough ammo, the requested ammo amount will be consumed
   if (RequestedAmmoAmount <= AmmoAmount)
   {

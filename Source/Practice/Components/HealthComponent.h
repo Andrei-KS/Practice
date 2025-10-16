@@ -6,8 +6,24 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+DECLARE_EVENT(UMyClass, FDestroyAllThatHaveHealthComponentEvent);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHealthOnDiedSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHealthOnHitSignature, int, DamageValue);
+
+namespace myConsoleCommand
+{
+  static FDestroyAllThatHaveHealthComponentEvent OnDestroyAllThatHaveHealthComponentEvent;
+  static FAutoConsoleCommand ConsoleCommandName(
+    TEXT("DestroyAllThatHaveHealthComponent"),
+    TEXT("Description of the command"),
+    FConsoleCommandDelegate::CreateLambda([]()
+      {
+        OnDestroyAllThatHaveHealthComponentEvent.Broadcast();
+      })
+  );
+}
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PRACTICE_API UHealthComponent : public UActorComponent
@@ -37,4 +53,6 @@ protected:
 public:
   UFUNCTION(BlueprintCallable, Category = "Health")
   void ApplyDamage(int DamageValue);
+
+  void HandleDestroyAllThatHaveHealthComponentEvent();
 };
