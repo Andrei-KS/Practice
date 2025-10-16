@@ -72,6 +72,8 @@ GS_StaircaseV2
 ![{C73AC896-9FAF-4F0D-85CA-E0D5B673E41B}](https://github.com/user-attachments/assets/c739a459-ba57-4a00-a4ae-6a601c36456f)
 ![{ABE5F0AD-AE38-4826-BB4F-D88B10BD3C89}](https://github.com/user-attachments/assets/447ad99a-5e5a-4869-ac24-452e182c4a22)
 
+<h1> Config and Debug console </h1>
+
 
 
 
