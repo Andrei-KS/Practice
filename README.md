@@ -74,6 +74,18 @@ GS_StaircaseV2
 
 <h1> Config and Debug console </h1>
 
+Added Config Variables: bIsLevitationComponentEnabled and LevitationHeightOfLevitationComponent.
+
+Added a Levitation Component to demonstrate the use of these config variables.
+The bIsLevitationComponentEnabled variable allows enabling or disabling the levitation component.
+The LevitationHeightOfLevitationComponent sets the maximum height that the actor containing this component can reach.
+
+**Note**: The levitation component attempts to find a mesh component within the actor. If a mesh is found, the component applies a force to it.
+<img width="701" height="384" alt="{8FAC6CBF-340C-422D-827E-6710846A3ADF}" src="https://github.com/user-attachments/assets/7146bacc-fd06-4db5-9397-3d2272221e17" />
+where bIsLevitationComponentEnabled = 0
+<img width="683" height="372" alt="{38843228-D543-4A83-9800-66736928600C}" src="https://github.com/user-attachments/assets/e68ef453-68dc-4cf9-b9b1-9d605df7e5a2" />
+where bIsLevitationComponentEnabled = 1
+
 
 
 
