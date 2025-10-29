@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "Practice/Interface/SaveActorInteface.h"
 #include "PracticeCharacter.generated.h"
 
 class UInputComponent;
@@ -31,7 +32,7 @@ namespace MyConsoleVariable
 }
 
 UCLASS(config=Game)
-class APracticeCharacter : public ACharacter
+class APracticeCharacter : public ACharacter, public ISaveActorInteface
 {
 	GENERATED_BODY()
 
@@ -194,5 +195,17 @@ protected:
   bool bIsCalculatePredictProjectilePath;
   float PredictLaunchVelocity;
   float ProjectileRadius;
+
+public:
+  // Save Actor
+  virtual FGuid GetActorSaveId_Implementation() override;
+  virtual FSaveActorData GetSaveData_Implementation() override;
+
+private:
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, SaveGame, meta = (AllowPrivateAccess = true))
+  FGuid SaveActorId;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadOnly, SaveGame, meta = (AllowPrivateAccess = true))
+  bool WasSpawned = false;
 };
 

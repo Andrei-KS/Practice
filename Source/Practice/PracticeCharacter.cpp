@@ -72,12 +72,19 @@ APracticeCharacter::APracticeCharacter()
   bIsCalculatePredictProjectilePath = false;
   PredictLaunchVelocity = 0;
   ProjectileRadius = 20;
+
+  SaveActorId = FGuid::NewGuid();
 }
 
 void APracticeCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+  if (!SaveActorId.IsValid())
+  {
+    SaveActorId = FGuid::NewGuid();
+  }
 
 	// Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -174,6 +181,22 @@ void APracticeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+}
+
+FGuid APracticeCharacter::GetActorSaveId_Implementation()
+{
+  return SaveActorId;
+}
+
+FSaveActorData APracticeCharacter::GetSaveData_Implementation()
+{
+  FSaveActorData Ret;
+
+  Ret.ActorClass = this->GetClass();
+  Ret.ActorTransform = this->GetTransform();
+  Ret.WasSpawned = this->WasSpawned;
+
+  return Ret;
 }
 
 
