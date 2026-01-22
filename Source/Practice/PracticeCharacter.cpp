@@ -20,6 +20,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Components/SplineComponent.h"
+#include "GameFramework/Actor.h"
 
 
 #include "EventBusSubsystem/BusSubsystemEvent.h"
@@ -196,7 +197,23 @@ FSaveActorData APracticeCharacter::GetSaveData_Implementation()
   Ret.ActorTransform = this->GetTransform();
   Ret.WasSpawned = this->WasSpawned;
 
+  if (Controller != nullptr)
+  {
+    Ret.IsHaveController = true;
+    Ret.ControllerRotator = Controller->GetControlRotation();
+  }
+
   return Ret;
+}
+
+FString APracticeCharacter::GetSaveString()
+{
+  FString Ret;
+  return Ret;
+}
+
+void APracticeCharacter::UpdateFromSave(TArray<FString> Parts)
+{
 }
 
 

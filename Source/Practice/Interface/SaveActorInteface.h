@@ -21,6 +21,12 @@ public:
   UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
   bool WasSpawned = false;
 
+  UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+  bool IsHaveController = false;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+  FRotator ControllerRotator;
+
   UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
   UClass* ActorClass;
 };

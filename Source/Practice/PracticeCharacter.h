@@ -41,7 +41,7 @@ class APracticeCharacter : public ACharacter, public ISaveActorInteface
 	USkeletalMeshComponent* Mesh1P;
 
 	/** First person camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, SaveGame, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCameraComponent;
 
 	/** MappingContext */
@@ -200,6 +200,9 @@ public:
   // Save Actor
   virtual FGuid GetActorSaveId_Implementation() override;
   virtual FSaveActorData GetSaveData_Implementation() override;
+
+  FString GetSaveString();
+  void UpdateFromSave(TArray<FString> Parts);
 
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadOnly, SaveGame, meta = (AllowPrivateAccess = true))

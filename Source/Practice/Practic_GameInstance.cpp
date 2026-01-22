@@ -112,6 +112,10 @@ void UPractic_GameInstance::LoadGame()
 
     FSaveActorData SaveActorData = SaveableActorData[SaveActorId];
     Actor->SetActorTransform(SaveActorData.ActorTransform);
+    if (SaveActorData.IsHaveController)
+    {
+      Actor->GetInstigatorController()->SetControlRotation(SaveActorData.ControllerRotator);
+    }
 
     FMemoryReader MemoryReader(SaveActorData.ByteData);
     FObjectAndNameAsStringProxyArchive Archive(MemoryReader, true);
