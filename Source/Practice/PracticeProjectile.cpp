@@ -5,6 +5,9 @@
 #include "Components/SphereComponent.h"
 #include "Components/HealthComponent.h"
 #include "Components/DamageComponent.h"
+#include "VisualLogger/VisualLogger.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogProjectile, Log, All);
 
 APracticeProjectile::APracticeProjectile() 
 {
@@ -45,4 +48,14 @@ void APracticeProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 
     DamageComponent->ApplyDamageTo(OtherActor);
 	}
+
+#if ENABLE_VISUAL_LOG
+  if (FVisualLogger::Get().IsRecording())
+  {
+    FVector StartPoint = GetActorLocation();
+    float ArrowLength = 50.0f;
+    FVector EndPoint = StartPoint + GetVelocity().GetSafeNormal() * ArrowLength;
+    UE_VLOG_ARROW(this, LogProjectile, Warning, StartPoint, EndPoint, FColor::Red, TEXT("Hit with velocity: %s"), *GetVelocity().ToString());
+  }
+#endif
 }

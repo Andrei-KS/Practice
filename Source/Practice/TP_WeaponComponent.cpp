@@ -9,6 +9,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "VisualLogger/VisualLogger.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogWeapon, Log, All);
 
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
@@ -53,6 +56,13 @@ void UTP_WeaponComponent::AttachWeapon(APracticeCharacter* TargetCharacter)
       EnhancedInputComponent->BindAction(UseAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Use);
     }
   }
+
+#if ENABLE_VISUAL_LOG
+  if (FVisualLogger::Get().IsRecording())
+  {
+    UE_VLOG(this, LogWeapon, Warning, TEXT("%s picked up %s"), *Character->GetActorNameOrLabel(), *GetOwner()->GetActorNameOrLabel());
+  }
+#endif
 
   EnableWeapon();
 }
